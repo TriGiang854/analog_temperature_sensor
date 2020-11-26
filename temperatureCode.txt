@@ -1,0 +1,105 @@
+// Define our states:
+const HOT = 0
+const COOL = 1
+const COLD = 2
+
+// Set our sensor thresholds for each state
+// Temperature to preserve food is 4 degrees celcius to -18 degress celcius 
+// Which is equal to 672 to 794 range in microbit  
+const SENSOR_LEVEL_1 = 672
+const SENSOR_LEVEL_2 = 794
+
+// Set the pin we will use for our analog sensor
+const ANALOG_SENSOR_PIN = AnalogPin.P0
+
+// Set the pins for the outputs for each state
+const STATE_1_OUTPUT_PIN = DigitalPin.P1
+const STATE_2_OUTPUT_PIN = DigitalPin.P2
+const STATE_3_OUTPUT_PIN = DigitalPin.P3
+
+// Set initial values for the sensor reading and state.
+let analogSensorValue = 0
+let state = HOT
+
+//We need to turn off the LED display for the digital outputs to work properly.
+led.enable(false)
+let strip =  neopixel.create(DigitalPin.P1, 8, NeoPixelMode.RGB)
+
+
+basic.forever(function () {
+    //These are our three functions for the state system.
+    updateSystem(state)
+    state = evaluateState(state)
+    reactToState(state)
+
+    //We pause momentarily since we don't need to loop as quickly as the micro:bit can actually loop.
+    basic.pause(200)
+
+    //This will let you look at the analog value of the sensor to determine the thresholds for each state.
+    serial.writeLine(analogSensorValue.toString())
+})
+
+function updateSystem(state:number){
+    analogSensorValue = pins.analogReadPin(ANALOG_SENSOR_PIN)
+}
+
+function evaluateState(state:number){
+    // In this evaluate state structure, the state is determined by the sensor value and nothing else.
+    // This means the system can transition from one state to another.
+    if(analogSensorValue < SENSOR_LEVEL_1){
+        state = HOT
+    }
+    else if(analogSensorValue >= SENSOR_LEVEL_1 && analogSensorValue < SENSOR_LEVEL_2){
+        state = COOL
+    }
+    else if(analogSensorValue >= SENSOR_LEVEL_2){
+        state = COLD
+    }
+    return state
+}
+
+function reactToState(state:number){
+    switch(state){
+        case HOT :
+           //too hot to preseve food
+            tooHot()
+            break
+        case COOL:
+           //correct temperature to preserve food
+            cool()
+            
+            break
+        case COLD:
+            //too cold to preserve food 
+            tooCold()
+            break
+    }
+}
+//state 1 is red
+//shows that the temperature is hotter than normal
+function tooHot(){
+        
+    strip.showColor(neopixel.colors(NeoPixelColors.Red))
+     flashinglight()
+}
+//state 2 is green
+//shows that the temperature is within the range 
+function cool(){
+strip.showColor(neopixel.colors(NeoPixelColors.Green))
+flashinglight()
+
+
+    
+}
+//state 3 is blue 
+//shows that the temperature is cooler than normal 
+function tooCold(){
+strip.showColor(neopixel.colors(NeoPixelColors.Blue))
+flashinglight()
+}
+function flashinglight(){
+strip.show()
+strip.clear()
+basic.pause(200)
+strip.show()
+}
