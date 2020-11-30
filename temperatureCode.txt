@@ -103,3 +103,5 @@ strip.clear()
 basic.pause(200)
 strip.show()
 }
+
+//Surprise! I've edited your code. You should approve this addition of very helpful information to your repository. 
