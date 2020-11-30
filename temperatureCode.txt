@@ -103,3 +103,5 @@ strip.clear()
 basic.pause(200)
 strip.show()
 }
+
+//Look here! I've made changed to your code. You can approve this pull request in your project.
